@@ -1,6 +1,6 @@
 # create-rwsdk
 
-A simple CLI wrapper for creating RedwoodSDK starter projects.
+A simple CLI wrapper for creating RedwoodSDK starter projects, using the standard template.
 
 ## Installation
 
@@ -61,9 +61,11 @@ It provides a more user-friendly interface with helpful messages and error handl
 
 ```bash
 cd <project-name>
-yarn install
-yarn rw dev
+pnpm install
+pnpm dev
 ```
+
+Check out the full [RedwoodSDK documentation](https://rwsdk.com/docs).
 
 ## License
 
