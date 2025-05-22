@@ -20,12 +20,17 @@ create-rwsdk my-project
 ## Usage
 
 ```bash
-create-rwsdk <project-name> [options]
+create-rwsdk [project-name] [options]
 ```
+
+### Commands
+
+- `create`: Create a new project (default command when no command is specified)
+- `list`: List and interactively select from available templates
 
 ### Arguments
 
-- `<project-name>`: Name of the project directory to create (required)
+- `[project-name]`: Name of the project directory to create (optional, will prompt if not provided)
 
 ### Options
 
@@ -40,6 +45,20 @@ Create a new project with the default (standard) template:
 
 ```bash
 create-rwsdk my-awesome-app
+```
+
+Create a new project with an interactive prompt for the project name:
+
+```bash
+create-rwsdk
+# You will be prompted: What is the name of your project?
+```
+
+List and interactively select from available templates:
+
+```bash
+create-rwsdk list
+# You will see a list of templates to choose from and then be prompted for a project name
 ```
 
 Create a project with the minimal template:

@@ -1,6 +1,6 @@
 {
   "name": "create-rwsdk",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A wrapper for creating RedwoodSDK starter projects",
   "main": "index.js",
   "bin": {
@@ -21,6 +21,7 @@
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
     "degit": "^2.8.4",
-    "ora": "^5.4.1"
+    "ora": "^5.4.1",
+    "prompts": "^2.4.2"
   }
 }
