@@ -2,6 +2,8 @@
 
 A simple CLI wrapper for creating RedwoodSDK starter projects with support for multiple templates.
 
+> **Note:** Version 2.0.0+ uses `tiged` instead of `degit` for template cloning. If you need the previous behavior, please use version 1.x.x.
+
 ## Installation
 
 You can use this package directly with npx:
@@ -85,17 +87,17 @@ This tool is a simple wrapper around the following commands, depending on the te
 
 ### Standard template (default)
 ```bash
-npx degit redwoodjs/sdk/starters/standard <project-name>
+npx tiged redwoodjs/sdk/starters/standard <project-name>
 ```
 
 ### Minimal template
 ```bash
-npx degit redwoodjs/sdk/starters/minimal <project-name>
+npx tiged redwoodjs/sdk/starters/minimal <project-name>
 ```
 
 ### Drizzle template
 ```bash
-npx degit redwoodjs/example-drizzle <project-name>
+npx tiged redwoodjs/example-drizzle <project-name>
 ```
 
 It provides a more user-friendly interface with helpful messages and error handling.
