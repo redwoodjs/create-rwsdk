@@ -100,7 +100,6 @@ async function createProject(projectName, options) {
 
   // download the tar/zip file from the github release
   const downloadUrl = `https://github.com/redwoodjs/sdk/releases/download/${version.tag_name}/${templateName}-${version.tag_name}.tar.gz`;
-  console.log(downloadUrl);
 
   const spinner = ora(
     `Downloading ${chalk.cyan(templateName)} template (${chalk.bold(
