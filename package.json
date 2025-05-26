@@ -1,27 +1,28 @@
 {
   "name": "create-rwsdk",
-  "version": "2.0.0",
-  "description": "A wrapper for creating RedwoodSDK starter projects",
+  "version": "3.0.0",
+  "description": "Create RedwoodSDK projects",
   "main": "index.js",
   "bin": {
     "create-rwsdk": "./index.js"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "redwoodjs",
+    "rwsdk",
     "sdk",
     "starter",
     "cli"
   ],
-  "author": "",
+  "author": "RedwoodJS Inc",
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
+    "decompress": "^4.2.1",
     "ora": "^5.4.1",
-    "prompts": "^2.4.2",
-    "tiged": "^2.12.7"
+    "prompts": "^2.4.2"
   }
 }

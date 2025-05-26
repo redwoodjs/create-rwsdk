@@ -3,23 +3,25 @@
 const { program } = require("commander");
 const chalk = require("chalk");
 const ora = require("ora");
-const tiged = require("tiged");
 const path = require("path");
 const fs = require("fs");
 const prompts = require("prompts");
+const os = require("os");
+const decompress = require("decompress");
+const stream = require("stream");
+const { promisify } = require("util");
 
 // Define available templates
 const TEMPLATES = {
   standard: "redwoodjs/sdk/starters/standard",
   minimal: "redwoodjs/sdk/starters/minimal",
-  drizzle: "redwoodjs/example-drizzle",
 };
 
 // Set up the CLI program
 program
   .name("create-rwsdk")
   .description("A wrapper for creating RedwoodSDK starter projects")
-  .version("1.2.0");
+  .version("3.0.0");
 
 // Default command (create a new project)
 program
@@ -29,7 +31,7 @@ program
   .option("-f, --force", "Force overwrite if directory exists", false)
   .option(
     "-t, --template <template>",
-    "Starter template to use (standard, minimal, drizzle)",
+    "Starter template to use (standard, minimal)",
     "standard"
   )
   .action(createProject);
@@ -93,22 +95,66 @@ async function createProject(projectName, options) {
 
   // Create the project using tiged
   const templateName = options.template;
-  const templateRepo = TEMPLATES[templateName];
+
+  const version = await getLatestSDKRelease();
+
+  // download the tar/zip file from the github release
+  const downloadUrl = `https://github.com/redwoodjs/sdk/releases/download/${version.tag_name}/${templateName}-${version.tag_name}.tar.gz`;
+  console.log(downloadUrl);
+
   const spinner = ora(
-    `Creating RedwoodSDK starter project using ${chalk.cyan(
-      templateName
-    )} template...`
+    `Downloading ${chalk.cyan(templateName)} template (${chalk.bold(
+      version.tag_name
+    )})...`
+  ).start();
+
+  const filePath = path.join(
+    os.tmpdir(),
+    `redwoodjs-sdk-${version.tag_name}-${templateName}.tar.gz`
+  );
+
+  try {
+    const response = await fetch(downloadUrl);
+    if (!response.ok) {
+      spinner.fail(
+        chalk.red(
+          `Error downloading template: ${response.statusText} (Status: ${response.status})`
+        )
+      );
+      try {
+        const errorBody = await response.json();
+        console.error(chalk.red(JSON.stringify(errorBody, null, 2)));
+      } catch (e) {
+        // Ignore if error body itself can't be parsed
+      }
+      process.exit(1);
+    }
+
+    const pipeline = promisify(stream.pipeline);
+    await pipeline(response.body, fs.createWriteStream(filePath));
+
+    spinner.succeed(
+      chalk.green(
+        `Successfully downloaded ${chalk.cyan(
+          templateName
+        )} template (${chalk.bold(version.tag_name)}) to ${chalk.bold(
+          filePath
+        )}`
+      )
+    );
+  } catch (error) {
+    spinner.fail(chalk.red("Failed to download template."));
+    console.error(chalk.red(error.message));
+    process.exit(1);
+  }
+
+  const decompressSpinner = ora(
+    `Decompressing template into ${chalk.bold(projectName)}...`
   ).start();
 
   try {
-    const emitter = tiged(templateRepo, {
-      force: options.force,
-      verbose: true,
-    });
-
-    await emitter.clone(targetDir);
-
-    spinner.succeed(
+    await decompress(filePath, targetDir);
+    decompressSpinner.succeed(
       chalk.green(
         `Successfully created RedwoodSDK starter project (${chalk.cyan(
           templateName
@@ -126,8 +172,12 @@ async function createProject(projectName, options) {
     // Ensure the process exits properly
     process.exit(0);
   } catch (error) {
-    spinner.fail(chalk.red("Failed to create project"));
+    decompressSpinner.fail(chalk.red("Failed to decompress template."));
     console.error(chalk.red(error.message));
+    // Clean up downloaded archive if decompression fails
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
     process.exit(1);
   }
 }
@@ -171,6 +221,52 @@ async function listTemplates() {
     template: response.template,
     force: false,
   });
+}
+
+// Function to get the latest RedwoodSDK release from GitHub
+async function getLatestSDKRelease() {
+  const GITHUB_API_URL =
+    "https://api.github.com/repos/redwoodjs/sdk/releases/latest";
+  const spinner = ora("Fetching latest release information...").start();
+
+  try {
+    const response = await fetch(GITHUB_API_URL, {
+      headers: { "User-Agent": "create-rwsdk" }, // GitHub API requires a User-Agent header
+    });
+
+    if (!response.ok) {
+      spinner.fail(
+        chalk.red(
+          `Error fetching release info: ${response.statusText} (Status: ${response.status})`
+        )
+      );
+      try {
+        const errorBody = await response.json();
+        console.error(chalk.red(JSON.stringify(errorBody, null, 2)));
+      } catch (e) {
+        // Ignore if error body itself can't be parsed
+      }
+      return null;
+    }
+
+    const releaseData = await response.json();
+    spinner.succeed(
+      chalk.green(
+        `Successfully fetched latest release: ${chalk.bold(
+          releaseData.tag_name
+        )}`
+      )
+    );
+    console.log(chalk.cyan(`Release Name: ${releaseData.name}`));
+    console.log(chalk.cyan(`Published At: ${releaseData.published_at}`));
+    console.log(chalk.cyan(`URL: ${releaseData.html_url}`));
+
+    return releaseData;
+  } catch (error) {
+    spinner.fail(chalk.red("Failed to fetch latest release information."));
+    console.error(chalk.red(error.message));
+    return null;
+  }
 }
 
 program.parse(process.argv);
