@@ -86,8 +86,8 @@ npx tiged redwoodjs/sdk/starters/minimal <project-name>
 
 ```bash
 cd <project-name>
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 Check out the full [RedwoodSDK documentation](https://rwsdk.com/docs).

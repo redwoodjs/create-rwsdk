@@ -164,8 +164,8 @@ async function createProject(projectName, options) {
     // Display next steps
     console.log("\n" + chalk.bold("Next steps:"));
     console.log(`  cd ${projectName}`);
-    console.log("  pnpm install");
-    console.log("  pnpm dev");
+    console.log("  npm install");
+    console.log("  npm run dev");
     console.log("\nHappy coding! 🚀\n");
 
     // Ensure the process exits properly
