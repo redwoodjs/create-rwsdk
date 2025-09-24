@@ -11,12 +11,6 @@ const decompress = require("decompress");
 const stream = require("stream");
 const { promisify } = require("util");
 
-// Define available templates
-const TEMPLATES = {
-  standard: "redwoodjs/sdk/starters/standard",
-  minimal: "redwoodjs/sdk/starters/minimal",
-};
-
 // Set up the CLI program
 program
   .name("create-rwsdk")
@@ -30,33 +24,16 @@ program
   .argument("[project-name]", "Name of the project directory to create")
   .option("-f, --force", "Force overwrite if directory exists", false)
   .option(
-    "-t, --template <template>",
-    "Starter template to use (standard, minimal)",
-    "standard"
+    "--legacy",
+    "Use the latest stable release (this is the default)",
+    true
   )
+  .option("--pre", "Use the latest pre-release", false)
   .action(createProject);
-
-// List templates command
-program
-  .command("list")
-  .description("List and select available templates")
-  .action(listTemplates);
 
 // Function to create a new project
 async function createProject(projectName, options) {
   console.log(chalk.bold.red("\n🌲 RedwoodSDK Starter 🌲\n"));
-
-  // Validate template option
-  if (!TEMPLATES[options.template]) {
-    console.error(
-      chalk.red(
-        `Error: Invalid template '${
-          options.template
-        }'. Available templates: ${Object.keys(TEMPLATES).join(", ")}`
-      )
-    );
-    process.exit(1);
-  }
 
   // Prompt for project name if not provided
   if (!projectName) {
@@ -93,23 +70,21 @@ async function createProject(projectName, options) {
     );
   }
 
-  // Create the project using tiged
-  const templateName = options.template;
+  const templateName = "starter";
 
-  const version = await getLatestSDKRelease();
+  const releaseType = options.pre ? "pre" : "legacy";
+  const version = await getLatestSDKRelease(releaseType);
 
   // download the tar/zip file from the github release
   const downloadUrl = `https://github.com/redwoodjs/sdk/releases/download/${version.tag_name}/${templateName}-${version.tag_name}.tar.gz`;
 
   const spinner = ora(
-    `Downloading ${chalk.cyan(templateName)} template (${chalk.bold(
-      version.tag_name
-    )})...`
+    `Downloading starter template (${chalk.bold(version.tag_name)})...`
   ).start();
 
   const filePath = path.join(
     os.tmpdir(),
-    `redwoodjs-sdk-${version.tag_name}-${templateName}.tar.gz`
+    `redwoodjs-sdk-${version.tag_name}-starter.tar.gz`
   );
 
   try {
@@ -134,11 +109,9 @@ async function createProject(projectName, options) {
 
     spinner.succeed(
       chalk.green(
-        `Successfully downloaded ${chalk.cyan(
-          templateName
-        )} template (${chalk.bold(version.tag_name)}) to ${chalk.bold(
-          filePath
-        )}`
+        `Successfully downloaded starter template (${chalk.bold(
+          version.tag_name
+        )}) to ${chalk.bold(filePath)}`
       )
     );
   } catch (error) {
@@ -155,9 +128,9 @@ async function createProject(projectName, options) {
     await decompress(filePath, targetDir);
     decompressSpinner.succeed(
       chalk.green(
-        `Successfully created RedwoodSDK starter project (${chalk.cyan(
-          templateName
-        )} template) in ${chalk.bold(projectName)}`
+        `Successfully created RedwoodSDK starter project in ${chalk.bold(
+          projectName
+        )}`
       )
     );
 
@@ -181,51 +154,12 @@ async function createProject(projectName, options) {
   }
 }
 
-// Function to list and select templates
-async function listTemplates() {
-  console.log(chalk.bold.red("\n🌲 RedwoodSDK Templates 🌲\n"));
-
-  // Prepare template choices for the prompt
-  const choices = Object.entries(TEMPLATES).map(([name, repo]) => ({
-    title: name.charAt(0).toUpperCase() + name.slice(1),
-    description: `Template: ${repo}`,
-    value: name,
-  }));
-
-  // Prompt user to select a template
-  const response = await prompts([
-    {
-      type: "select",
-      name: "template",
-      message: "Select a template to use:",
-      choices,
-      initial: 0,
-    },
-    {
-      type: "text",
-      name: "projectName",
-      message: "What is the name of your project?",
-      validate: (value) => (value.trim() ? true : "Project name is required"),
-    },
-  ]);
-
-  // Exit if user cancels the prompt
-  if (!response.template || !response.projectName) {
-    console.log(chalk.yellow("\nTemplate selection cancelled."));
-    process.exit(0);
-  }
-
-  // Create the project with the selected template
-  await createProject(response.projectName, {
-    template: response.template,
-    force: false,
-  });
-}
-
 // Function to get the latest RedwoodSDK release from GitHub
-async function getLatestSDKRelease() {
+async function getLatestSDKRelease(releaseType = "legacy") {
   const GITHUB_API_URL =
-    "https://api.github.com/repos/redwoodjs/sdk/releases/latest";
+    releaseType === "legacy"
+      ? "https://api.github.com/repos/redwoodjs/sdk/releases/latest"
+      : "https://api.github.com/repos/redwoodjs/sdk/releases";
   const spinner = ora("Fetching latest release information...").start();
 
   try {
@@ -249,18 +183,20 @@ async function getLatestSDKRelease() {
     }
 
     const releaseData = await response.json();
+    const latestRelease =
+      releaseType === "legacy" ? releaseData : releaseData[0];
     spinner.succeed(
       chalk.green(
         `Successfully fetched latest release: ${chalk.bold(
-          releaseData.tag_name
+          latestRelease.tag_name
         )}`
       )
     );
-    console.log(chalk.cyan(`Release Name: ${releaseData.name}`));
-    console.log(chalk.cyan(`Published At: ${releaseData.published_at}`));
-    console.log(chalk.cyan(`URL: ${releaseData.html_url}`));
+    console.log(chalk.cyan(`Release Name: ${latestRelease.name}`));
+    console.log(chalk.cyan(`Published At: ${latestRelease.published_at}`));
+    console.log(chalk.cyan(`URL: ${latestRelease.html_url}`));
 
-    return releaseData;
+    return latestRelease;
   } catch (error) {
     spinner.fail(chalk.red("Failed to fetch latest release information."));
     console.error(chalk.red(error.message));
