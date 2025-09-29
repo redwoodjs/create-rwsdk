@@ -15,7 +15,7 @@ const { promisify } = require("util");
 program
   .name("create-rwsdk")
   .description("A wrapper for creating RedwoodSDK starter projects")
-  .version("3.0.0-alpha.1");
+  .version("3.0.0-alpha.2");
 
 // Default command (create a new project)
 program
