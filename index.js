@@ -15,7 +15,7 @@ const { promisify } = require("util");
 program
   .name("create-rwsdk")
   .description("A wrapper for creating RedwoodSDK starter projects")
-  .version("3.0.0");
+  .version("3.0.0-alpha.1");
 
 // Default command (create a new project)
 program
@@ -23,12 +23,11 @@ program
   .description("Create a new RedwoodSDK project")
   .argument("[project-name]", "Name of the project directory to create")
   .option("-f, --force", "Force overwrite if directory exists", false)
-  .option(
-    "--legacy",
-    "Use the latest stable release (this is the default)",
-    true
-  )
   .option("--pre", "Use the latest pre-release", false)
+  .option(
+    "--release <version>",
+    "Use a specific release version (e.g., v1.0.0-alpha.1)"
+  )
   .action(createProject);
 
 // Function to create a new project
@@ -72,8 +71,17 @@ async function createProject(projectName, options) {
 
   const templateName = "starter";
 
-  const releaseType = options.pre ? "pre" : "legacy";
-  const version = await getLatestSDKRelease(releaseType);
+  let version;
+  if (options.release) {
+    // Use specific version
+    version = { tag_name: options.release };
+  } else if (options.pre) {
+    // Use latest pre-release
+    version = await getLatestSDKRelease("pre");
+  } else {
+    // Default: use latest release (including betas marked as latest)
+    version = await getLatestSDKRelease("latest");
+  }
 
   // download the tar/zip file from the github release
   const downloadUrl = `https://github.com/redwoodjs/sdk/releases/download/${version.tag_name}/${templateName}-${version.tag_name}.tar.gz`;
@@ -155,9 +163,9 @@ async function createProject(projectName, options) {
 }
 
 // Function to get the latest RedwoodSDK release from GitHub
-async function getLatestSDKRelease(releaseType = "legacy") {
+async function getLatestSDKRelease(releaseType = "latest") {
   const GITHUB_API_URL =
-    releaseType === "legacy"
+    releaseType === "latest"
       ? "https://api.github.com/repos/redwoodjs/sdk/releases/latest"
       : "https://api.github.com/repos/redwoodjs/sdk/releases";
   const spinner = ora("Fetching latest release information...").start();
@@ -184,7 +192,7 @@ async function getLatestSDKRelease(releaseType = "legacy") {
 
     const releaseData = await response.json();
     const latestRelease =
-      releaseType === "legacy" ? releaseData : releaseData[0];
+      releaseType === "latest" ? releaseData : releaseData[0];
     spinner.succeed(
       chalk.green(
         `Successfully fetched latest release: ${chalk.bold(
