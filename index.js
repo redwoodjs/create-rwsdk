@@ -191,8 +191,24 @@ async function getLatestSDKRelease(releaseType = "latest") {
     }
 
     const releaseData = await response.json();
-    const latestRelease =
-      releaseType === "latest" ? releaseData : releaseData[0];
+
+    let latestRelease;
+    if (releaseType === "latest") {
+      latestRelease = releaseData;
+    } else {
+      // For pre-releases, filter out test releases
+      const nonTestReleases = releaseData.filter(
+        (release) => !release.tag_name.includes("-test.")
+      );
+
+      if (nonTestReleases.length === 0) {
+        spinner.fail(chalk.red("No non-test pre-releases found"));
+        return null;
+      }
+
+      latestRelease = nonTestReleases[0];
+    }
+
     spinner.succeed(
       chalk.green(
         `Successfully fetched latest release: ${chalk.bold(
