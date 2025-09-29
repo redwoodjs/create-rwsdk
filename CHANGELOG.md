@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0-alpha.1] - 2025-09-29
+
+### Added
+- Support for specific version selection with `--release <version>` option
+
+### Changed
+- Default behavior now uses GitHub's "latest" release (which includes betas marked as latest)
+- `--pre` flag explicitly opts into pre-releases
+
+### Breaking Changes
+- Removed support for multiple templates. The CLI now uses a single, default starter template.
+- Removed the `list` command.
+- Removed the `-t, --template` option.
+
 ## [2.0.0] - 2024-03-21
 
 ### Breaking Changes
@@ -27,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support for multiple starter templates:
   - `standard` (default): Uses `redwoodjs/sdk/starters/standard`
-  - `minimal`: Uses `redwoodjs/sdk/starters/minimal`
+  - `starter`: Uses `redwoodjs/sdk/starter`
   - `drizzle`: Uses `redwoodjs/example-drizzle`
 - New command-line option: `-t, --template <template>` to specify which template to use
 - Template validation to ensure only valid templates are used
