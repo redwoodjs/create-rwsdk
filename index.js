@@ -73,8 +73,11 @@ async function createProject(projectName, options) {
 
   let version;
   if (options.release) {
-    // Use specific version
-    version = { tag_name: options.release };
+    // Use specific version, ensuring it starts with 'v'
+    const tagName = options.release.startsWith("v")
+      ? options.release
+      : `v${options.release}`;
+    version = { tag_name: tagName };
   } else if (options.pre) {
     // Use latest pre-release
     version = await getLatestSDKRelease("pre");
