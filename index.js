@@ -11,6 +11,8 @@ const decompress = require("decompress");
 const stream = require("stream");
 const { promisify } = require("util");
 
+const { detectPackageManager, getPackageManagerCommands } = require("./utils");
+
 // Set up the CLI program
 program
   .name("create-rwsdk")
@@ -145,11 +147,15 @@ async function createProject(projectName, options) {
       )
     );
 
+    // Detect package manager and get appropriate commands
+    const packageManager = detectPackageManager();
+    const commands = getPackageManagerCommands(packageManager);
+
     // Display next steps
     console.log("\n" + chalk.bold("Next steps:"));
     console.log(`  cd ${projectName}`);
-    console.log("  npm install");
-    console.log("  npm run dev");
+    console.log(`  ${commands.install}`);
+    console.log(`  ${commands.dev}`);
     console.log("\nHappy coding! 🚀\n");
 
     // Ensure the process exits properly
