@@ -171,11 +171,15 @@ async function getLatestSDKRelease(releaseType = "latest") {
     releaseType === "latest"
       ? "https://api.github.com/repos/redwoodjs/sdk/releases/latest"
       : "https://api.github.com/repos/redwoodjs/sdk/releases";
+  const auth = process.env.GITHUB_API_TOKEN;
   const spinner = ora("Fetching latest release information...").start();
 
   try {
     const response = await fetch(GITHUB_API_URL, {
-      headers: { "User-Agent": "create-rwsdk" }, // GitHub API requires a User-Agent header
+      headers: {
+        "User-Agent": "create-rwsdk" // GitHub API requires a User-Agent header
+        ...auth ? { Authorization: `Bearer ${auth}` } : {} // Providing an API token avoids being rate limited
+      },
     });
 
     if (!response.ok) {
