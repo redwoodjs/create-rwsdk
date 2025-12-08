@@ -177,8 +177,8 @@ async function getLatestSDKRelease(releaseType = "latest") {
   try {
     const response = await fetch(GITHUB_API_URL, {
       headers: {
-        "User-Agent": "create-rwsdk" // GitHub API requires a User-Agent header
-        ...auth ? { Authorization: `Bearer ${auth}` } : {} // Providing an API token avoids being rate limited
+        "User-Agent": "create-rwsdk", // GitHub API requires a User-Agent header
+        ...(auth ? { Authorization: `Bearer ${auth}` } : {}), // Providing an API token avoids being rate limited
       },
     });
 
