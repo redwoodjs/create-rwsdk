@@ -1,0 +1,70 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # Only run for verified users
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    strategy:
+      matrix:
+        node-version: [22, 23]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Test default create command (latest release)
+        run: |
+          mkdir -p test-run
+          cd test-run
+          node ../index.js create test-project-default
+          cd ..
+          rm -rf test-run
+
+      - name: Test --pre flag
+        run: |
+          mkdir -p test-run
+          cd test-run
+          node ../index.js create test-project-pre --pre
+          cd ..
+          rm -rf test-run
+
+      - name: Test --release flag with specific version
+        run: |
+          mkdir -p test-run
+          cd test-run
+          node ../index.js create test-project-release --release v3.0.0-alpha.1
+          cd ..
+          rm -rf test-run
+
+      - name: Test --force flag
+        run: |
+          mkdir -p test-run
+          cd test-run
+          node ../index.js create test-project-force
+          node ../index.js create test-project-force --force
+          cd ..
+          rm -rf test-run
