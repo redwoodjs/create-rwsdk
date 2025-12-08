@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     # Only run for verified users
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    env:
+      GITHUB_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
     strategy:
       matrix:
         node-version: [22, 23]
