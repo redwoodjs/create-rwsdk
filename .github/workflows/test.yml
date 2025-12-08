@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir -p test-run
           cd test-run
-          node ../index.js create test-project-release --release v3.0.0-alpha.1
+          node ../index.js create test-project-release --release v1.0.0-beta.39
           cd ..
           rm -rf test-run
 
