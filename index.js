@@ -12,12 +12,13 @@ const stream = require("stream");
 const { promisify } = require("util");
 
 const { detectPackageManager, getPackageManagerCommands } = require("./utils");
+const packageJson = require("./package.json");
 
 // Set up the CLI program
 program
   .name("create-rwsdk")
   .description("A wrapper for creating RedwoodSDK starter projects")
-  .version("3.0.0-alpha.2");
+  .version(packageJson.version);
 
 // Default command (create a new project)
 program
