@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2025-12-04
+
+### Added
+- Support for GitHub API token authentication via `GITHUB_API_TOKEN` environment variable to prevent rate limiting when fetching release information
+
 ## [3.1.0] - 2025-09-30
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "create-rwsdk",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Create RedwoodSDK projects",
   "main": "index.js",
   "bin": {
